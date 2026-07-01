@@ -1,5 +1,5 @@
-const BASE = import.meta.env.PROD
-  ? `https://${window.location.host}/api`
+export const BASE = import.meta.env.PROD
+  ? "https://seyha2002.onrender.com/api"
   : "/api";
 
 export async function fetchPortfolio() {
