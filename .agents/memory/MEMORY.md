@@ -1,0 +1,2 @@
+- [API server data path](api-server-data-path.md) — data files must use process.cwd() not __dirname; esbuild bundles to dist/ so __dirname is wrong at runtime
+- [Admin dashboard](admin-dashboard.md) — password-protected /admin page; default password admin1234; can be overridden via ADMIN_PASSWORD env var

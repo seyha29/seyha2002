@@ -8,6 +8,7 @@ import Projects from "./components/Projects/Projects";
 import Contact from "./components/Contact/Contact";
 import Footer from "./components/Footer/Footer";
 import Resume from "./pages/Resume";
+import Admin from "./pages/Admin";
 import ScrollToTop from "./components/ScrollToTop";
 import "./App.css";
 
@@ -52,6 +53,7 @@ function App() {
             }
           />
           <Route path="/resume" element={<Resume />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </div>

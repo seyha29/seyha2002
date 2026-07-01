@@ -1,0 +1,78 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "title": "University IU CAM",
+      "description": "A responsive university website built with React and CSS modules featuring modern UI components and smooth animations.",
+      "image": "/assets/projects/project1.jpg",
+      "link": "https://seyha29.github.io/my-react-website/",
+      "tags": ["React", "CSS Modules", "Responsive"]
+    },
+    {
+      "id": "2",
+      "title": "Portfolio Website",
+      "description": "Professional portfolio showcasing my projects and skills with responsive design and interactive elements.",
+      "image": "/assets/projects/project2.jpg",
+      "link": "https://harobert2002.netlify.app/",
+      "tags": ["React", "CSS", "Responsive Design"]
+    },
+    {
+      "id": "3",
+      "title": "Laravel E-Commerce",
+      "description": "Full-featured e-commerce platform built with Laravel featuring product management and payment processing.",
+      "image": "/assets/projects/project3.jpg",
+      "link": "https://your-booking-platform.com",
+      "tags": ["Laravel", "MySQL", "Payment Integration"]
+    },
+    {
+      "id": "4",
+      "title": "React E-Commerce Store",
+      "description": "Modern e-commerce application built with React featuring shopping cart, user authentication, and Stripe payment integration, translation khmer and English, download receipt.",
+      "image": "/assets/projects/p4.jpg",
+      "link": "https://seyha29.github.io/ecomerces_react_js/",
+      "tags": ["React"]
+    }
+  ],
+  "certificates": [
+    {
+      "id": "1",
+      "title": "AWS Academy Graduate - AWS Academy Cloud Foundations",
+      "issuer": "Amazon Web Services",
+      "date": "April 27, 2025",
+      "link": "https://drive.google.com/file/d/167TJCCbPVYB8vAECvkFgJrXN1zyxl_oA/view?usp=sharing",
+      "image": "/assets/certificates/aws.jpg",
+      "skills": ["Cloud Computing", "AWS Services", "Security Fundamentals"]
+    },
+    {
+      "id": "2",
+      "title": "Fortinet Network Security Associate",
+      "issuer": "Fortinet",
+      "date": "June 15, 2025",
+      "link": "https://drive.google.com/file/d/16F9uzdxm8PCtkIme2w0QAImxY3N0bXQh/view?usp=sharing",
+      "image": "/assets/certificates/fortinet.jpg",
+      "skills": ["Network Security", "Firewalls", "Threat Protection"]
+    }
+  ],
+  "skills": [
+    { "id": "1", "name": "HTML", "level": 95, "color": "#E34F26", "category": "Frontend" },
+    { "id": "2", "name": "CSS", "level": 90, "color": "#1572B6", "category": "Frontend" },
+    { "id": "3", "name": "JavaScript", "level": 85, "color": "#F7DF1E", "category": "Frontend" },
+    { "id": "4", "name": "Bootstrap", "level": 88, "color": "#7952B3", "category": "Frontend" },
+    { "id": "5", "name": "Tailwind", "level": 82, "color": "#06B6D4", "category": "Frontend" },
+    { "id": "6", "name": "React JS", "level": 80, "color": "#61DAFB", "category": "Frontend" },
+    { "id": "7", "name": "PHP", "level": 75, "color": "#777BB4", "category": "Backend" },
+    { "id": "8", "name": "Laravel", "level": 70, "color": "#FF2D20", "category": "Backend" }
+  ],
+  "about": {
+    "bio1": "I'm a web developer and designer with over two years of experience creating and redesigning websites for better functionality and visual appeal. I specialize in front-end development using HTML, CSS, JavaScript, and React, and have built a range of projects including e-commerce platforms, budget trackers, and reservation systems.",
+    "bio2": "I also have experience with Node.js, Express, Figma, and other tools. I focus on delivering responsive, user-friendly websites and can assist with content updates, feature improvements, and complete redesigns tailored to client needs.",
+    "experience": "2+ Years",
+    "location": "Phnom Penh, Cambodia",
+    "status": "Available"
+  },
+  "contact": {
+    "email": "thanseyha2002@gmail.com",
+    "phone": "+855 186-323-203",
+    "location": "Phnom Penh, Cambodia"
+  }
+}
