@@ -10,20 +10,15 @@ function Admin() {
   const [data, setData] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem("admin_authed");
-    if (stored === "1") setAuthed(true);
-  }, []);
+  const pwRef = React.useRef("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const contact = await fetch("/api/portfolio/contact").then(r => r.json());
       await saveSection("contact", contact, password);
+      pwRef.current = password;
       setAuthed(true);
-      sessionStorage.setItem("admin_authed", "1");
-      sessionStorage.setItem("admin_pw", password);
       setAuthError("");
     } catch {
       setAuthError("Wrong password. Try again.");
@@ -42,9 +37,8 @@ function Admin() {
   const save = async (section, value) => {
     setSaving(true);
     setSaveMsg("");
-    const pw = sessionStorage.getItem("admin_pw") || password;
     try {
-      await saveSection(section, value, pw);
+      await saveSection(section, value, pwRef.current);
       setSaveMsg("✓ Saved successfully!");
       loadData();
     } catch {
@@ -86,7 +80,7 @@ function Admin() {
         <div className="admin-header-right">
           {saveMsg && <span className={`save-msg ${saveMsg.startsWith("✓") ? "success" : "error"}`}>{saveMsg}</span>}
           <a href="/" className="admin-back-btn">← Back to Portfolio</a>
-          <button className="admin-logout" onClick={() => { sessionStorage.clear(); setAuthed(false); }}>Logout</button>
+          <button className="admin-logout" onClick={() => { pwRef.current = ""; setAuthed(false); setPassword(""); }}>Logout</button>
         </div>
       </div>
 
