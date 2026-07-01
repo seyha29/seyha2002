@@ -6,7 +6,11 @@ const DATA_FILE = path.resolve(process.cwd(), "data/portfolio.json");
 
 const router: IRouter = Router();
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_PASSWORD) {
+  throw new Error("ADMIN_PASSWORD environment variable is required");
+}
 
 function readData() {
   return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
