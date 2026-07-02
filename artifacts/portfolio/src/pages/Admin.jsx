@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchPortfolio, saveSection } from "../lib/api";
+import { fetchPortfolio, saveSection, BASE } from "../lib/api";
 import "./Admin.css";
 
 function Admin() {
@@ -15,7 +15,7 @@ function Admin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const contact = await fetch("/api/portfolio/contact").then(r => r.json());
+      const contact = await fetch(`${BASE}/portfolio/contact`).then(r => r.json());
       await saveSection("contact", contact, password);
       pwRef.current = password;
       setAuthed(true);
