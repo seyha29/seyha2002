@@ -17,6 +17,9 @@ const DEFAULT_CV = {
     { category: "Tools & Technologies", items: "Git, GitHub, REST APIs, MySQL, Responsive Web Design" },
     { category: "Research", items: "Google, AI" }
   ],
+  experience: [
+    { role: "Freelance Web Developer", company: "Self-employed", period: "2023 – Present", description: "Built and maintained websites for clients including e-commerce platforms, portfolio sites, and landing pages using React, Laravel, and MySQL." }
+  ],
   languages: ["Khmer (Native)", "English (Medium)"],
   personalInfo: { gender: "Male", dob: "03 August 2002", age: "23 years old", address: "Phnom Penh, Cambodia" },
   contactLinks: {
@@ -40,7 +43,7 @@ function Resume() {
       .catch(() => {});
   }, []);
 
-  const { name, title, summary, profileImage, education, cvSkills, languages, personalInfo, contactLinks } = cv;
+  const { name, title, summary, profileImage, education, experience, cvSkills, languages, personalInfo, contactLinks } = cv;
 
   return (
     <section id="resume" className="resume">
@@ -78,6 +81,21 @@ function Resume() {
               ))}
             </ul>
           </div>
+
+          {experience && experience.length > 0 && (
+            <div className="detail-section">
+              <h3>Experience</h3>
+              <ul>
+                {experience.map((e, i) => (
+                  <li key={i}>
+                    <strong>{e.role}</strong>{e.company ? ` — ${e.company}` : ""}<br />
+                    {e.period && <em style={{ fontSize: "0.9em", color: "#94a3b8" }}>{e.period}</em>}
+                    {e.description && <><br />{e.description}</>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="detail-section">
             <h3>Skills</h3>

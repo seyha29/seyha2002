@@ -276,6 +276,13 @@ function CVEditor({ cv, onSave, saving }) {
   const update = (field, val) => setForm(f => ({ ...f, [field]: val }));
   const updateNested = (field, subfield, val) => setForm(f => ({ ...f, [field]: { ...f[field], [subfield]: val } }));
 
+  const updateExp = (i, field, val) => {
+    const exp = form.experience.map((e, idx) => idx === i ? { ...e, [field]: val } : e);
+    setForm(f => ({ ...f, experience: exp }));
+  };
+  const addExp = () => setForm(f => ({ ...f, experience: [...(f.experience || []), { role: "", company: "", period: "", description: "" }] }));
+  const removeExp = (i) => setForm(f => ({ ...f, experience: f.experience.filter((_, idx) => idx !== i) }));
+
   const updateEdu = (i, field, val) => {
     const edu = form.education.map((e, idx) => idx === i ? { ...e, [field]: val } : e);
     setForm(f => ({ ...f, education: edu }));
@@ -338,6 +345,24 @@ function CVEditor({ cv, onSave, saving }) {
           <label>Title / Role<input value={form.title} onChange={e => update("title", e.target.value)} placeholder="Software Developer" /></label>
           <label className="full">Summary<textarea value={form.summary} onChange={e => update("summary", e.target.value)} rows={4} /></label>
         </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 style={{ color: "#60a5fa" }}>Experience</h3>
+          <button className="add-btn" onClick={addExp}>+ Add</button>
+        </div>
+        {(form.experience || []).map((e, i) => (
+          <div key={i} className="cv-sub-card">
+            <div className="form-grid">
+              <label>Role / Position<input value={e.role} onChange={ev => updateExp(i, "role", ev.target.value)} placeholder="Frontend Developer" /></label>
+              <label>Company<input value={e.company} onChange={ev => updateExp(i, "company", ev.target.value)} placeholder="Company Name" /></label>
+              <label>Period<input value={e.period} onChange={ev => updateExp(i, "period", ev.target.value)} placeholder="2023 – Present" /></label>
+              <label className="full">Description<textarea value={e.description} onChange={ev => updateExp(i, "description", ev.target.value)} rows={2} /></label>
+            </div>
+            <button className="remove-btn sm" onClick={() => removeExp(i)} style={{ marginTop: 8 }}>✕ Remove</button>
+          </div>
+        ))}
       </div>
 
       <div className="admin-card">

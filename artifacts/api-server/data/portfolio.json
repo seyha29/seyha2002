@@ -190,6 +190,14 @@
         "items": "Google, AI"
       }
     ],
+    "experience": [
+      {
+        "role": "Freelance Web Developer",
+        "company": "Self-employed",
+        "period": "2023 – Present",
+        "description": "Built and maintained websites for clients including e-commerce platforms, portfolio sites, and landing pages using React, Laravel, and MySQL."
+      }
+    ],
     "languages": [
       "Khmer (Native)",
       "English (Medium)"
