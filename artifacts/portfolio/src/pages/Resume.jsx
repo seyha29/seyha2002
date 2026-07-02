@@ -137,7 +137,7 @@ function Resume() {
 
         <div className="download-btn-container">
           <a
-            href="/assets/Resume.pdf"
+            href={`${BASE}/portfolio/cv-pdf`}
             className="resume-download"
             target="_blank"
             rel="noopener noreferrer"

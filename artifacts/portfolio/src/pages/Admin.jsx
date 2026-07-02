@@ -99,7 +99,7 @@ function Admin() {
         {activeTab === "skills" && <SkillsEditor skills={data.skills} onSave={(v) => save("skills", v)} saving={saving} />}
         {activeTab === "about" && <AboutEditor about={data.about} onSave={(v) => save("about", v)} saving={saving} />}
         {activeTab === "contact" && <ContactEditor contact={data.contact} onSave={(v) => save("contact", v)} saving={saving} />}
-        {activeTab === "cv" && <CVEditor cv={data.cv} onSave={(v) => save("cv", v)} saving={saving} />}
+        {activeTab === "cv" && <CVEditor cv={data.cv} onSave={(v) => save("cv", v)} saving={saving} pwRef={pwRef} />}
       </div>
     </div>
   );
@@ -268,7 +268,55 @@ function ContactEditor({ contact, onSave, saving }) {
   );
 }
 
-function CVEditor({ cv, onSave, saving }) {
+function PDFUploader({ password }) {
+  const [status, setStatus] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file || file.type !== "application/pdf") {
+      setStatus("✗ Please select a PDF file.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result.split(",")[1];
+      setUploading(true);
+      setStatus("");
+      try {
+        const res = await fetch(`${BASE}/portfolio/cv-pdf`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "x-admin-password": password.current },
+          body: JSON.stringify({ base64 }),
+        });
+        if (!res.ok) throw new Error();
+        setStatus("✓ PDF uploaded! Download link is now live.");
+      } catch {
+        setStatus("✗ Upload failed. Check your password.");
+      } finally {
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div>
+      <label className="cv-upload-label">
+        📄 {uploading ? "Uploading..." : "Upload PDF Resume"}
+        <input type="file" accept="application/pdf" onChange={handleUpload} style={{ display: "none" }} disabled={uploading} />
+      </label>
+      {status && (
+        <p style={{ marginTop: 10, fontSize: 14, color: status.startsWith("✓") ? "#4ade80" : "#f87171" }}>{status}</p>
+      )}
+      <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 8 }}>
+        After upload, the Download PDF button on your CV will serve this file directly from the API.
+      </p>
+    </div>
+  );
+}
+
+function CVEditor({ cv, onSave, saving, pwRef }) {
   const [form, setForm] = useState(cv);
   const [previewImage, setPreviewImage] = useState(cv.profileImage);
   useEffect(() => { setForm(cv); setPreviewImage(cv.profileImage); }, [cv]);
@@ -419,6 +467,11 @@ function CVEditor({ cv, onSave, saving }) {
           <label>Age<input value={form.personalInfo.age} onChange={e => updateNested("personalInfo", "age", e.target.value)} placeholder="23 years old" /></label>
           <label>Address<input value={form.personalInfo.address} onChange={e => updateNested("personalInfo", "address", e.target.value)} /></label>
         </div>
+      </div>
+
+      <div className="admin-card">
+        <h3 style={{ marginBottom: 16, color: "#60a5fa" }}>Resume PDF</h3>
+        <PDFUploader password={pwRef} />
       </div>
 
       <div className="admin-card">

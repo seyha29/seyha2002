@@ -98,4 +98,24 @@ router.put("/portfolio/cv", authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+router.get("/portfolio/cv-pdf", (_req, res) => {
+  const data = readData();
+  if (!data.cvPdf) {
+    return res.status(404).json({ error: "No PDF uploaded yet" });
+  }
+  const buf = Buffer.from(data.cvPdf, "base64");
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=Resume.pdf");
+  res.send(buf);
+});
+
+router.put("/portfolio/cv-pdf", authMiddleware, (req, res) => {
+  const { base64 } = req.body;
+  if (!base64) return res.status(400).json({ error: "No PDF data" });
+  const data = readData();
+  data.cvPdf = base64;
+  writeData(data);
+  res.json({ success: true });
+});
+
 export default router;
