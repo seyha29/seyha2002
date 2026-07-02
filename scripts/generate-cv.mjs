@@ -59,9 +59,13 @@ const contacts = "thanseyha2002@gmail.com   |   +855 186323203   |   github.com/
 doc.fontSize(8).font("Helvetica").fillColor(LGRAY)
    .text(contacts, M, headerBottom, { width: PW - M * 2, align: "center" });
 
-let curY = headerBottom + 18;
+let curY = headerBottom + 10;
 
-// ── Helper: horizontal divider (no-op — lines removed) ───────────────
+// ── Single centered blue line below header ────────────────────────────
+doc.moveTo(M, curY).lineTo(PW - M, curY).strokeColor(BLUE).lineWidth(1.5).stroke();
+curY += 14;
+
+// ── Helper: horizontal divider (no-op) ───────────────────────────────
 function divider(_y) {}
 
 // ── Helper: section heading (blue text, no underline) ─────────────────
