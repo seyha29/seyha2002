@@ -6,124 +6,102 @@ const doc = new PDFDocument({ margin: 0, size: "A4" });
 const outPath = path.resolve("artifacts/portfolio/public/assets/Resume.pdf");
 doc.pipe(fs.createWriteStream(outPath));
 
-const PW = doc.page.width;   // 595
-const PH = doc.page.height;  // 842
+const PW = doc.page.width;   // 595.28
+const PH = doc.page.height;  // 841.89
 
 const BLUE     = "#2563EB";
 const DARKBLUE = "#1e3a8a";
+const SIDEBG   = "#1e293b";
 const DARK     = "#1e293b";
 const GRAY     = "#475569";
 const LGRAY    = "#94a3b8";
 const WHITE    = "#ffffff";
-const DIVIDER  = "#dbeafe";
-const BGRIGHT  = "#f8fafc";
+const LBLUE    = "#bfdbfe";
+const DIVBLUE  = "#dbeafe";
 
-const SIDEBAR_W = 195;
-const MAIN_X    = SIDEBAR_W;
-const MAIN_W    = PW - SIDEBAR_W;
-const PAD       = 18;
+const SIDEBAR_W = 190;
+const PAD       = 16;
+const HDR_H     = 115;
 
-// ─── SIDEBAR background ─────────────────────────────────────────────
-doc.rect(0, 0, SIDEBAR_W, PH).fill(DARK);
-
-// ─── MAIN background ────────────────────────────────────────────────
-doc.rect(SIDEBAR_W, 0, MAIN_W, PH).fill(WHITE);
-
-// ─── HEADER strip (full width) ──────────────────────────────────────
-const HDR_H = 120;
+// ── Backgrounds ───────────────────────────────────────────────────────
+doc.rect(0, 0, SIDEBAR_W, PH).fill(SIDEBG);
+doc.rect(SIDEBAR_W, 0, PW - SIDEBAR_W, PH).fill(WHITE);
 doc.rect(0, 0, PW, HDR_H).fill(BLUE);
 
-// Profile photo circle
-const cx = SIDEBAR_W / 2;
-const cy = HDR_H + 54;
-const radius = 44;
-doc.circle(cx, cy, radius + 3).fill(DARKBLUE);  // border
-doc.circle(cx, cy, radius).fill(BLUE);           // placeholder fill (will be overridden if photo exists)
-
-// Try to embed actual profile photo
+// ── Profile photo ─────────────────────────────────────────────────────
+const photoX = SIDEBAR_W / 2;
+const photoY = HDR_H + 52;
+const R = 42;
+doc.circle(photoX, photoY, R + 3).fill(DARKBLUE);
 const photoPath = path.resolve("artifacts/portfolio/public/assets/profile1.jpg");
 if (fs.existsSync(photoPath)) {
   doc.save();
-  doc.circle(cx, cy, radius).clip();
-  doc.image(photoPath, cx - radius, cy - radius, { width: radius * 2, height: radius * 2 });
+  doc.circle(photoX, photoY, R).clip();
+  doc.image(photoPath, photoX - R, photoY - R, { width: R * 2, height: R * 2 });
   doc.restore();
 } else {
-  doc.fontSize(9).font("Helvetica").fillColor(WHITE).text("PHOTO", cx - 16, cy - 6);
+  doc.circle(photoX, photoY, R).fill(BLUE);
+  doc.fontSize(9).font("Helvetica").fillColor(WHITE).text("PHOTO", photoX - 14, photoY - 5);
 }
 
-// Name & title in header
-doc.fontSize(22).font("Helvetica-Bold").fillColor(WHITE)
-   .text("Than Seyha", SIDEBAR_W + PAD, 22, { width: MAIN_W - PAD * 2 });
-doc.fontSize(12).font("Helvetica").fillColor(DIVIDER)
-   .text("Software Developer", SIDEBAR_W + PAD, 52, { width: MAIN_W - PAD * 2 });
+// ── Header text ───────────────────────────────────────────────────────
+const hx = SIDEBAR_W + PAD;
+doc.fontSize(24).font("Helvetica-Bold").fillColor(WHITE).text("Than Seyha", hx, 20);
+doc.fontSize(12).font("Helvetica").fillColor(DIVBLUE).text("Software Developer", hx, 52);
+doc.fontSize(8.5).fillColor(LBLUE)
+   .text("thanseyha2002@gmail.com   |   +855 186 323 203   |   github.com/seyha29   |   Phnom Penh, Cambodia", hx, 82, {
+     width: PW - SIDEBAR_W - PAD * 2,
+   });
 
-// Contact icons row
-const contacts = [
-  { icon: "✉", val: "thanseyha2002@gmail.com" },
-  { icon: "☏", val: "+855 186 323 203" },
-  { icon: "⌂", val: "Phnom Penh, Cambodia" },
-];
-let cx2 = SIDEBAR_W + PAD;
-const cy2 = 82;
-doc.fontSize(8).fillColor("#bfdbfe");
-contacts.forEach(({ icon, val }) => {
-  doc.font("Helvetica-Bold").text(icon + " ", cx2, cy2, { continued: true });
-  doc.font("Helvetica").text(val + "   ", { continued: true });
-  cx2 += doc.widthOfString(icon + " " + val + "   ");
-});
-doc.text("", { continued: false });
+// ── SIDEBAR helpers ───────────────────────────────────────────────────
+let sy = photoY + R + 20;
 
-// ─── SIDEBAR content ────────────────────────────────────────────────
-let sy = cy + radius + 24;  // start below photo circle
-
-function sideLabel(text) {
-  doc.rect(0, sy, SIDEBAR_W, 1).fill("#334155");
-  sy += 6;
-  doc.fontSize(9).font("Helvetica-Bold").fillColor(BLUE)
-     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
-  sy = doc.y + 5;
+function sideSection(title) {
+  sy += 8;
+  doc.moveTo(PAD, sy).lineTo(SIDEBAR_W - PAD, sy).strokeColor("#334155").lineWidth(0.5).stroke();
+  sy += 5;
+  doc.fontSize(8.5).font("Helvetica-Bold").fillColor(BLUE)
+     .text(title, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
+  sy = doc.y + 4;
 }
 
-function sideText(text, opts = {}) {
-  doc.fontSize(8.5).font("Helvetica").fillColor(LGRAY)
-     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2, lineGap: 1, ...opts });
-  sy = doc.y + 3;
-}
-
-function sideBold(text) {
+function sideCat(label) {
   doc.fontSize(8.5).font("Helvetica-Bold").fillColor(WHITE)
-     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
+     .text(label, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
   sy = doc.y + 1;
 }
 
+function sideItem(text) {
+  doc.fontSize(8).font("Helvetica").fillColor(LGRAY)
+     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2, lineGap: 1 });
+  sy = doc.y + 3;
+}
+
 // Skills
-sideLabel("SKILLS");
+sideSection("SKILLS");
+sideCat("Frontend");
+sideItem("HTML, CSS, JavaScript\nReact.js, Bootstrap, Tailwind");
+sideCat("Backend");
+sideItem("PHP, Laravel, Node.js, Express");
+sideCat("Database");
+sideItem("MySQL");
+sideCat("Tools");
+sideItem("Git, GitHub, Figma, REST APIs");
 
-const skills = [
-  ["Frontend", "HTML, CSS, JavaScript\nReact.js, Bootstrap, Tailwind"],
-  ["Backend",  "PHP, Laravel, Node.js\nExpress"],
-  ["Database", "MySQL"],
-  ["Tools",    "Git, GitHub, Figma\nREST APIs"],
-];
-skills.forEach(([cat, items]) => {
-  sideBold(cat);
-  sideText(items);
-  sy += 2;
-});
+// Languages
+sideSection("LANGUAGES");
+sideItem("Khmer (Native)");
+sideItem("English (Intermediate)");
 
-sy += 4;
-sideLabel("LANGUAGES");
-sideText("Khmer (Native)");
-sideText("English (Intermediate)");
-
-sy += 4;
-sideLabel("PERSONAL");
+// Personal
+sideSection("PERSONAL");
 const personal = [
-  ["Gender",  "Male"],
-  ["Born",    "03 August 2002"],
-  ["Age",     "23 years old"],
-  ["Address", "Phnom Penh\nCambodia"],
-  ["Telegram","@thanseyha11"],
+  ["Gender",    "Male"],
+  ["Born",      "03 August 2002"],
+  ["Age",       "23 years old"],
+  ["Address",   "Phnom Penh, Cambodia"],
+  ["Telegram",  "@thanseyha11"],
+  ["LinkedIn",  "linkedin.com/in/thanseyha"],
 ];
 personal.forEach(([k, v]) => {
   doc.fontSize(7.5).font("Helvetica-Bold").fillColor(LGRAY)
@@ -134,86 +112,86 @@ personal.forEach(([k, v]) => {
   sy = doc.y + 5;
 });
 
-sy += 4;
-sideLabel("LINKS");
-[
-  "github.com/seyha29",
-  "linkedin.com/in/thanseyha",
-].forEach(l => {
-  doc.fontSize(8).font("Helvetica").fillColor(BLUE)
-     .text(l, PAD, sy, { width: SIDEBAR_W - PAD * 2, underline: false });
-  sy = doc.y + 3;
-});
-
-// ─── MAIN content ───────────────────────────────────────────────────
-const MX  = MAIN_X + PAD;
-const MW  = MAIN_W - PAD * 2;
-let my = HDR_H + 18;
+// ── MAIN content helpers ──────────────────────────────────────────────
+const MX = SIDEBAR_W + PAD;
+const MW = PW - SIDEBAR_W - PAD * 2;
+let my = HDR_H + 14;
 
 function mainSection(title) {
-  my += 6;
+  my += 7;
   doc.fontSize(10).font("Helvetica-Bold").fillColor(BLUE)
      .text(title, MX, my, { width: MW });
   my = doc.y + 1;
-  doc.moveTo(MX, my).lineTo(MX + MW, my).strokeColor(BLUE).lineWidth(0.8).stroke();
+  doc.moveTo(MX, my).lineTo(MX + MW, my).strokeColor(BLUE).lineWidth(0.7).stroke();
   my += 5;
 }
 
-function mainBody(text, opts = {}) {
-  doc.fontSize(9).font("Helvetica").fillColor(GRAY)
-     .text(text, MX, my, { width: MW, lineGap: 2, ...opts });
-  my = doc.y + 3;
-}
-
-function mainBold(text, opts = {}) {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
-     .text(text, MX, my, { width: MW, ...opts });
+function mainTitle(text) {
+  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK)
+     .text(text, MX, my, { width: MW });
   my = doc.y;
 }
 
-// SUMMARY
+function mainSub(text) {
+  doc.fontSize(8.5).font("Helvetica").fillColor(LGRAY)
+     .text(text, MX, my, { width: MW });
+  my = doc.y;
+}
+
+function mainItalic(text) {
+  doc.fontSize(8.5).font("Helvetica-Oblique").fillColor(BLUE)
+     .text(text, MX, my, { width: MW });
+  my = doc.y;
+}
+
+function mainBody(text) {
+  doc.fontSize(9).font("Helvetica").fillColor(GRAY)
+     .text(text, MX, my, { width: MW, lineGap: 2 });
+  my = doc.y + 2;
+}
+
+function mainLink(text) {
+  doc.fontSize(8).font("Helvetica").fillColor(BLUE)
+     .text(text, MX, my, { width: MW });
+  my = doc.y;
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────
 mainSection("PROFILE SUMMARY");
 mainBody(
-  "Recent Computer Science graduate passionate about software development and web technologies. Skilled in front-end development using React, HTML, CSS and JavaScript, with hands-on experience building e-commerce platforms, university websites, and portfolio projects. Eager to contribute through internships and professional roles in a dynamic tech environment."
+  "Recent Computer Science graduate passionate about software development and web technologies. Skilled in front-end development using React, HTML, CSS and JavaScript, with hands-on experience building e-commerce platforms, university websites and portfolio projects. Eager to contribute through internships and professional roles in a dynamic tech environment."
 );
 
-// EXPERIENCE
+// ── EXPERIENCE ────────────────────────────────────────────────────────
 mainSection("EXPERIENCE");
-doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK)
-   .text("Freelance Web Developer", MX, my, { width: MW, continued: true });
-doc.fontSize(9).font("Helvetica").fillColor(LGRAY).text("  —  Self-employed");
-my = doc.y;
-doc.fontSize(8.5).font("Helvetica-Oblique").fillColor(BLUE)
-   .text("2023 – Present", MX, my, { width: MW });
-my = doc.y + 1;
-mainBody("Designed and developed responsive websites for clients: e-commerce stores, portfolio sites, and landing pages using React.js, Laravel, MySQL and REST APIs.");
+mainTitle("Freelance Web Developer");
+mainSub("Self-employed");
+mainItalic("2023 - Present");
+mainBody("Designed and developed responsive websites for clients: e-commerce stores, portfolio sites and landing pages using React.js, Laravel, MySQL and REST APIs.");
 
-// EDUCATION
+// ── EDUCATION ─────────────────────────────────────────────────────────
 mainSection("EDUCATION");
-
 [
-  ["Bachelor of Computer Science", "Royal University of Phnom Penh", "Graduated 2025"],
-  ["Diploma — General Education",  "Hun Sen Sandek High School",       "Graduated 2021"],
-].forEach(([deg, school, year]) => {
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(deg, MX, my, { width: MW });
-  my = doc.y;
-  doc.fontSize(9).font("Helvetica").fillColor(GRAY).text(`${school}  ·  ${year}`, MX, my, { width: MW });
-  my = doc.y + 5;
+  ["Bachelor of Computer Science", "Royal University of Phnom Penh  |  Graduated 2025"],
+  ["Diploma - General Education",  "Hun Sen Sandek High School  |  Graduated 2021"],
+].forEach(([deg, sub]) => {
+  mainTitle(deg);
+  mainSub(sub);
+  my += 4;
 });
 
-// CERTIFICATES
+// ── CERTIFICATES ──────────────────────────────────────────────────────
 mainSection("CERTIFICATES");
 [
-  ["AWS Academy Cloud Foundations",       "Amazon Web Services", "April 27, 2025"],
-  ["Fortinet Network Security Associate", "Fortinet",            "June 15, 2025"],
-].forEach(([title, issuer, date]) => {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
-     .text("▸  " + title, MX, my, { width: MW, continued: true });
-  doc.fontSize(9).font("Helvetica").fillColor(LGRAY).text(`   ${issuer}  ·  ${date}`);
-  my = doc.y + 3;
+  ["AWS Academy Cloud Foundations",       "Amazon Web Services  |  April 27, 2025"],
+  ["Fortinet Network Security Associate", "Fortinet  |  June 15, 2025"],
+].forEach(([title, sub]) => {
+  mainTitle("- " + title);
+  mainSub(sub);
+  my += 3;
 });
 
-// PROJECTS
+// ── PROJECTS ──────────────────────────────────────────────────────────
 mainSection("PROJECTS");
 const projects = [
   {
@@ -234,7 +212,7 @@ const projects = [
     desc:  "Full-stack store with product management and payment processing.",
   },
   {
-    name:  "RUENG VIP — Movie Streaming",
+    name:  "RUENG VIP - Movie Streaming",
     stack: "Node.js, Express",
     desc:  "Movie streaming web application.",
     url:   "ruengvip.com",
@@ -242,28 +220,22 @@ const projects = [
 ];
 
 projects.forEach(({ name, stack, desc, url }) => {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
-     .text("▸  " + name, MX, my, { width: MW, continued: true });
-  doc.fontSize(8.5).font("Helvetica").fillColor(BLUE).text(`  [${stack}]`);
-  my = doc.y;
-  doc.fontSize(9).font("Helvetica").fillColor(GRAY).text(desc, MX, my, { width: MW });
-  my = doc.y;
-  if (url) {
-    doc.fontSize(8).fillColor(BLUE).text(url, MX, my, { width: MW });
-    my = doc.y;
-  }
-  my += 4;
+  mainTitle("- " + name);
+  mainSub(stack);
+  mainBody(desc);
+  if (url) mainLink(url);
+  my += 2;
 });
 
-// ─── Footer ─────────────────────────────────────────────────────────
-const FOOTER_Y = PH - 28;
-doc.rect(SIDEBAR_W, FOOTER_Y - 2, MAIN_W, 30).fill(BGRIGHT);
+// ── Footer ────────────────────────────────────────────────────────────
+const FY = PH - 25;
+doc.rect(SIDEBAR_W, FY - 4, PW - SIDEBAR_W, 30).fill("#f8fafc");
 doc.fontSize(7.5).font("Helvetica").fillColor(LGRAY)
    .text(
-     "thanseyha2002@gmail.com  ·  +855 186 323 203  ·  github.com/seyha29  ·  linkedin.com/in/thanseyha",
-     MAIN_X + PAD, FOOTER_Y + 4,
-     { width: MAIN_W - PAD * 2, align: "center" }
+     "thanseyha2002@gmail.com  |  +855 186 323 203  |  github.com/seyha29  |  linkedin.com/in/thanseyha",
+     SIDEBAR_W + PAD, FY + 3,
+     { width: PW - SIDEBAR_W - PAD * 2, align: "center" }
    );
 
 doc.end();
-console.log("PDF generated at:", outPath);
+console.log("PDF generated:", outPath);
