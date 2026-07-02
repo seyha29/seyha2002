@@ -2,211 +2,268 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 
-const doc = new PDFDocument({ margin: 50, size: "A4" });
+const doc = new PDFDocument({ margin: 0, size: "A4" });
 const outPath = path.resolve("artifacts/portfolio/public/assets/Resume.pdf");
 doc.pipe(fs.createWriteStream(outPath));
 
-const W = doc.page.width;
-const BLUE = "#2563EB";
-const DARK = "#1e293b";
-const GRAY = "#64748b";
-const LIGHT = "#f1f5f9";
-const WHITE = "#ffffff";
+const PW = doc.page.width;   // 595
+const PH = doc.page.height;  // 842
 
-// ── Header background ──────────────────────────────────────────
-doc.rect(0, 0, W, 130).fill(BLUE);
+const BLUE     = "#2563EB";
+const DARKBLUE = "#1e3a8a";
+const DARK     = "#1e293b";
+const GRAY     = "#475569";
+const LGRAY    = "#94a3b8";
+const WHITE    = "#ffffff";
+const DIVIDER  = "#dbeafe";
+const BGRIGHT  = "#f8fafc";
 
-// Profile circle placeholder
-doc.circle(90, 65, 42).fill(WHITE);
-doc.fontSize(10).fillColor(BLUE).text("PHOTO", 68, 59);
+const SIDEBAR_W = 195;
+const MAIN_X    = SIDEBAR_W;
+const MAIN_W    = PW - SIDEBAR_W;
+const PAD       = 18;
 
-// Name & title
-doc.fontSize(26).font("Helvetica-Bold").fillColor(WHITE).text("Than Seyha", 148, 28);
-doc.fontSize(13).font("Helvetica").fillColor("#bfdbfe").text("Software Developer", 148, 60);
+// ─── SIDEBAR background ─────────────────────────────────────────────
+doc.rect(0, 0, SIDEBAR_W, PH).fill(DARK);
 
-// Contact row
+// ─── MAIN background ────────────────────────────────────────────────
+doc.rect(SIDEBAR_W, 0, MAIN_W, PH).fill(WHITE);
+
+// ─── HEADER strip (full width) ──────────────────────────────────────
+const HDR_H = 120;
+doc.rect(0, 0, PW, HDR_H).fill(BLUE);
+
+// Profile photo circle
+const cx = SIDEBAR_W / 2;
+const cy = HDR_H + 54;
+const radius = 44;
+doc.circle(cx, cy, radius + 3).fill(DARKBLUE);  // border
+doc.circle(cx, cy, radius).fill(BLUE);           // placeholder fill (will be overridden if photo exists)
+
+// Try to embed actual profile photo
+const photoPath = path.resolve("artifacts/portfolio/public/assets/profile1.jpg");
+if (fs.existsSync(photoPath)) {
+  doc.save();
+  doc.circle(cx, cy, radius).clip();
+  doc.image(photoPath, cx - radius, cy - radius, { width: radius * 2, height: radius * 2 });
+  doc.restore();
+} else {
+  doc.fontSize(9).font("Helvetica").fillColor(WHITE).text("PHOTO", cx - 16, cy - 6);
+}
+
+// Name & title in header
+doc.fontSize(22).font("Helvetica-Bold").fillColor(WHITE)
+   .text("Than Seyha", SIDEBAR_W + PAD, 22, { width: MAIN_W - PAD * 2 });
+doc.fontSize(12).font("Helvetica").fillColor(DIVIDER)
+   .text("Software Developer", SIDEBAR_W + PAD, 52, { width: MAIN_W - PAD * 2 });
+
+// Contact icons row
 const contacts = [
-  "thanseyha2002@gmail.com",
-  "+855 186 323 203",
-  "github.com/seyha29",
-  "Phnom Penh, Cambodia",
+  { icon: "✉", val: "thanseyha2002@gmail.com" },
+  { icon: "☏", val: "+855 186 323 203" },
+  { icon: "⌂", val: "Phnom Penh, Cambodia" },
 ];
-doc.fontSize(8).fillColor("#dbeafe");
-let cx = 148;
-contacts.forEach((c, i) => {
-  doc.text(c, cx, 84);
-  cx += doc.widthOfString(c) + 20;
+let cx2 = SIDEBAR_W + PAD;
+const cy2 = 82;
+doc.fontSize(8).fillColor("#bfdbfe");
+contacts.forEach(({ icon, val }) => {
+  doc.font("Helvetica-Bold").text(icon + " ", cx2, cy2, { continued: true });
+  doc.font("Helvetica").text(val + "   ", { continued: true });
+  cx2 += doc.widthOfString(icon + " " + val + "   ");
 });
+doc.text("", { continued: false });
 
-doc.y = 145;
+// ─── SIDEBAR content ────────────────────────────────────────────────
+let sy = cy + radius + 24;  // start below photo circle
 
-// ── Helper: section heading ────────────────────────────────────
-function sectionHeading(title) {
-  doc.moveDown(0.6);
-  doc.fontSize(11).font("Helvetica-Bold").fillColor(BLUE).text(title.toUpperCase());
-  doc
-    .moveTo(50, doc.y + 2)
-    .lineTo(W - 50, doc.y + 2)
-    .strokeColor(BLUE)
-    .lineWidth(1)
-    .stroke();
-  doc.moveDown(0.4);
+function sideLabel(text) {
+  doc.rect(0, sy, SIDEBAR_W, 1).fill("#334155");
+  sy += 6;
+  doc.fontSize(9).font("Helvetica-Bold").fillColor(BLUE)
+     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
+  sy = doc.y + 5;
 }
 
-// ── Helper: body text ──────────────────────────────────────────
-function body(text, options = {}) {
-  doc.fontSize(9.5).font("Helvetica").fillColor(DARK).text(text, { lineGap: 2, ...options });
+function sideText(text, opts = {}) {
+  doc.fontSize(8.5).font("Helvetica").fillColor(LGRAY)
+     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2, lineGap: 1, ...opts });
+  sy = doc.y + 3;
 }
 
-function label(text) {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK).text(text, { continued: true });
+function sideBold(text) {
+  doc.fontSize(8.5).font("Helvetica-Bold").fillColor(WHITE)
+     .text(text, PAD, sy, { width: SIDEBAR_W - PAD * 2 });
+  sy = doc.y + 1;
 }
 
-// ── SUMMARY ───────────────────────────────────────────────────
-sectionHeading("Profile Summary");
-body(
-  "Recent Computer Science graduate from the Royal University of Phnom Penh, passionate about software development and web technologies. Skilled in front-end development using React, HTML, CSS and JavaScript, with hands-on experience building e-commerce platforms, university websites, and portfolio projects. Eager to contribute through internships and professional roles in a dynamic tech environment."
-);
-
-// ── Two-column layout helper ───────────────────────────────────
-const LEFT = 50;
-const RIGHT = 310;
-const COL_W = 235;
-
-// ── EXPERIENCE ────────────────────────────────────────────────
-sectionHeading("Experience");
-
-function expEntry(role, company, period, desc) {
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(role, { continued: true });
-  doc.fontSize(9.5).font("Helvetica").fillColor(GRAY).text(`  —  ${company}`);
-  doc.fontSize(8.5).font("Helvetica-Oblique").fillColor(GRAY).text(period);
-  body(desc, { lineGap: 2 });
-  doc.moveDown(0.3);
-}
-
-expEntry(
-  "Freelance Web Developer",
-  "Self-employed",
-  "2023 – Present",
-  "Designed and developed responsive websites for clients, including e-commerce stores, portfolio sites, and landing pages using React.js, Laravel, MySQL, and REST APIs."
-);
-
-// ── EDUCATION ─────────────────────────────────────────────────
-sectionHeading("Education");
-
-function eduEntry(degree, school, year) {
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(degree);
-  doc.fontSize(9.5).font("Helvetica").fillColor(GRAY).text(`${school}  ·  ${year}`);
-  doc.moveDown(0.3);
-}
-
-eduEntry("Bachelor of Computer Science", "Royal University of Phnom Penh", "Graduated 2025");
-eduEntry("Diploma — General Education", "Hun Sen Sandek High School", "Graduated 2021");
-
-// ── Save Y for two-column start ────────────────────────────────
-const twoColY = doc.y + 8;
-
-// ── LEFT COLUMN — SKILLS ─────────────────────────────────────
-doc.y = twoColY;
-doc.x = LEFT;
-doc.fontSize(11).font("Helvetica-Bold").fillColor(BLUE).text("SKILLS", LEFT, twoColY, { width: COL_W });
-doc.moveTo(LEFT, doc.y + 2).lineTo(LEFT + COL_W, doc.y + 2).strokeColor(BLUE).lineWidth(1).stroke();
-doc.moveDown(0.4);
+// Skills
+sideLabel("SKILLS");
 
 const skills = [
-  ["Frontend", "HTML · CSS · JavaScript · React.js · Bootstrap · Tailwind"],
-  ["Backend", "PHP · Laravel · Node.js · Express"],
+  ["Frontend", "HTML, CSS, JavaScript\nReact.js, Bootstrap, Tailwind"],
+  ["Backend",  "PHP, Laravel, Node.js\nExpress"],
   ["Database", "MySQL"],
-  ["Tools", "Git · GitHub · REST APIs · Figma · Responsive Design"],
-  ["Research", "Google · AI tools"],
+  ["Tools",    "Git, GitHub, Figma\nREST APIs"],
 ];
-
 skills.forEach(([cat, items]) => {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK).text(cat + ":", LEFT, doc.y, { width: COL_W });
-  doc.fontSize(9).font("Helvetica").fillColor(GRAY).text(items, LEFT, doc.y, { width: COL_W, lineGap: 1 });
-  doc.moveDown(0.25);
+  sideBold(cat);
+  sideText(items);
+  sy += 2;
 });
 
-// ── RIGHT COLUMN — LANGUAGES & PERSONAL ─────────────────────
-const rightY = twoColY;
-doc.y = rightY;
-doc.fontSize(11).font("Helvetica-Bold").fillColor(BLUE).text("LANGUAGES", RIGHT, rightY, { width: COL_W });
-doc.moveTo(RIGHT, doc.y + 2).lineTo(RIGHT + COL_W, doc.y + 2).strokeColor(BLUE).lineWidth(1).stroke();
-doc.moveDown(0.4);
+sy += 4;
+sideLabel("LANGUAGES");
+sideText("Khmer (Native)");
+sideText("English (Intermediate)");
 
-["Khmer — Native", "English — Intermediate"].forEach((l) => {
-  doc.fontSize(9.5).font("Helvetica").fillColor(DARK).text(l, RIGHT, doc.y, { width: COL_W });
-  doc.moveDown(0.2);
-});
-
-doc.moveDown(0.6);
-doc.fontSize(11).font("Helvetica-Bold").fillColor(BLUE).text("PERSONAL INFO", RIGHT, doc.y, { width: COL_W });
-doc.moveTo(RIGHT, doc.y + 2).lineTo(RIGHT + COL_W, doc.y + 2).strokeColor(BLUE).lineWidth(1).stroke();
-doc.moveDown(0.4);
-
+sy += 4;
+sideLabel("PERSONAL");
 const personal = [
-  ["Gender", "Male"],
-  ["Date of Birth", "03 August 2002"],
-  ["Age", "23 years old"],
-  ["Address", "Phnom Penh, Cambodia"],
-  ["Telegram", "@thanseyha11"],
-  ["LinkedIn", "linkedin.com/in/thanseyha"],
+  ["Gender",  "Male"],
+  ["Born",    "03 August 2002"],
+  ["Age",     "23 years old"],
+  ["Address", "Phnom Penh\nCambodia"],
+  ["Telegram","@thanseyha11"],
 ];
-
 personal.forEach(([k, v]) => {
-  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK).text(k + ": ", RIGHT, doc.y, { continued: true, width: COL_W });
-  doc.font("Helvetica").fillColor(GRAY).text(v, { width: COL_W });
-  doc.moveDown(0.15);
+  doc.fontSize(7.5).font("Helvetica-Bold").fillColor(LGRAY)
+     .text(k.toUpperCase(), PAD, sy, { width: SIDEBAR_W - PAD * 2 });
+  sy = doc.y;
+  doc.fontSize(8.5).font("Helvetica").fillColor(WHITE)
+     .text(v, PAD, sy, { width: SIDEBAR_W - PAD * 2, lineGap: 1 });
+  sy = doc.y + 5;
 });
 
-// ── CERTIFICATES ──────────────────────────────────────────────
-const afterCols = Math.max(doc.y, twoColY + 180);
-doc.y = afterCols + 10;
-doc.x = LEFT;
-
-sectionHeading("Certificates");
-
-const certs = [
-  ["AWS Academy Cloud Foundations", "Amazon Web Services", "April 27, 2025"],
-  ["Fortinet Network Security Associate", "Fortinet", "June 15, 2025"],
-];
-
-certs.forEach(([title, issuer, date]) => {
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(`• ${title}`, { continued: true });
-  doc.fontSize(9.5).font("Helvetica").fillColor(GRAY).text(`  —  ${issuer}  ·  ${date}`);
-  doc.moveDown(0.2);
+sy += 4;
+sideLabel("LINKS");
+[
+  "github.com/seyha29",
+  "linkedin.com/in/thanseyha",
+].forEach(l => {
+  doc.fontSize(8).font("Helvetica").fillColor(BLUE)
+     .text(l, PAD, sy, { width: SIDEBAR_W - PAD * 2, underline: false });
+  sy = doc.y + 3;
 });
 
-// ── PROJECTS ──────────────────────────────────────────────────
-sectionHeading("Projects");
+// ─── MAIN content ───────────────────────────────────────────────────
+const MX  = MAIN_X + PAD;
+const MW  = MAIN_W - PAD * 2;
+let my = HDR_H + 18;
 
-const projects = [
-  ["University IU CAM Website", "React.js, CSS Modules", "Responsive university website with modern UI and smooth animations.", "https://seyha29.github.io/my-react-website/"],
-  ["React E-Commerce Store", "React.js, Stripe", "Full-featured store with cart, authentication, payment integration, Khmer/English translation, and receipt download.", "https://seyha29.github.io/ecomerces_react_js/"],
-  ["Laravel E-Commerce Platform", "Laravel, MySQL", "Full-stack e-commerce with product management and payment processing."],
-  ["RUENG VIP — Movie Streaming", "Node.js, Express", "Movie streaming web app.", "http://ruengvip.com/"],
-];
+function mainSection(title) {
+  my += 6;
+  doc.fontSize(10).font("Helvetica-Bold").fillColor(BLUE)
+     .text(title, MX, my, { width: MW });
+  my = doc.y + 1;
+  doc.moveTo(MX, my).lineTo(MX + MW, my).strokeColor(BLUE).lineWidth(0.8).stroke();
+  my += 5;
+}
 
-projects.forEach(([name, stack, desc, link]) => {
-  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(`• ${name}`, { continued: true });
-  doc.fontSize(9).font("Helvetica").fillColor(BLUE).text(`  [${stack}]`);
-  body(desc);
-  if (link) {
-    doc.fontSize(8.5).fillColor(BLUE).text(link, { underline: true });
-  }
-  doc.moveDown(0.25);
-});
+function mainBody(text, opts = {}) {
+  doc.fontSize(9).font("Helvetica").fillColor(GRAY)
+     .text(text, MX, my, { width: MW, lineGap: 2, ...opts });
+  my = doc.y + 3;
+}
 
-// ── Footer ─────────────────────────────────────────────────────
-doc.moveDown(0.5);
-const footerY = doc.page.height - 40;
-doc.moveTo(50, footerY).lineTo(W - 50, footerY).strokeColor("#e2e8f0").lineWidth(0.5).stroke();
-doc.fontSize(8).font("Helvetica").fillColor(GRAY).text(
-  "thanseyha2002@gmail.com  ·  +855 186 323 203  ·  github.com/seyha29  ·  linkedin.com/in/thanseyha",
-  50,
-  footerY + 6,
-  { align: "center", width: W - 100 }
+function mainBold(text, opts = {}) {
+  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
+     .text(text, MX, my, { width: MW, ...opts });
+  my = doc.y;
+}
+
+// SUMMARY
+mainSection("PROFILE SUMMARY");
+mainBody(
+  "Recent Computer Science graduate passionate about software development and web technologies. Skilled in front-end development using React, HTML, CSS and JavaScript, with hands-on experience building e-commerce platforms, university websites, and portfolio projects. Eager to contribute through internships and professional roles in a dynamic tech environment."
 );
+
+// EXPERIENCE
+mainSection("EXPERIENCE");
+doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK)
+   .text("Freelance Web Developer", MX, my, { width: MW, continued: true });
+doc.fontSize(9).font("Helvetica").fillColor(LGRAY).text("  —  Self-employed");
+my = doc.y;
+doc.fontSize(8.5).font("Helvetica-Oblique").fillColor(BLUE)
+   .text("2023 – Present", MX, my, { width: MW });
+my = doc.y + 1;
+mainBody("Designed and developed responsive websites for clients: e-commerce stores, portfolio sites, and landing pages using React.js, Laravel, MySQL and REST APIs.");
+
+// EDUCATION
+mainSection("EDUCATION");
+
+[
+  ["Bachelor of Computer Science", "Royal University of Phnom Penh", "Graduated 2025"],
+  ["Diploma — General Education",  "Hun Sen Sandek High School",       "Graduated 2021"],
+].forEach(([deg, school, year]) => {
+  doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK).text(deg, MX, my, { width: MW });
+  my = doc.y;
+  doc.fontSize(9).font("Helvetica").fillColor(GRAY).text(`${school}  ·  ${year}`, MX, my, { width: MW });
+  my = doc.y + 5;
+});
+
+// CERTIFICATES
+mainSection("CERTIFICATES");
+[
+  ["AWS Academy Cloud Foundations",       "Amazon Web Services", "April 27, 2025"],
+  ["Fortinet Network Security Associate", "Fortinet",            "June 15, 2025"],
+].forEach(([title, issuer, date]) => {
+  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
+     .text("▸  " + title, MX, my, { width: MW, continued: true });
+  doc.fontSize(9).font("Helvetica").fillColor(LGRAY).text(`   ${issuer}  ·  ${date}`);
+  my = doc.y + 3;
+});
+
+// PROJECTS
+mainSection("PROJECTS");
+const projects = [
+  {
+    name:  "University IU CAM Website",
+    stack: "React.js, CSS Modules",
+    desc:  "Responsive university website with modern UI and smooth animations.",
+    url:   "seyha29.github.io/my-react-website",
+  },
+  {
+    name:  "React E-Commerce Store",
+    stack: "React.js, Stripe",
+    desc:  "Shopping cart, authentication, Stripe payments, Khmer/English translation.",
+    url:   "seyha29.github.io/ecomerces_react_js",
+  },
+  {
+    name:  "Laravel E-Commerce Platform",
+    stack: "Laravel, MySQL",
+    desc:  "Full-stack store with product management and payment processing.",
+  },
+  {
+    name:  "RUENG VIP — Movie Streaming",
+    stack: "Node.js, Express",
+    desc:  "Movie streaming web application.",
+    url:   "ruengvip.com",
+  },
+];
+
+projects.forEach(({ name, stack, desc, url }) => {
+  doc.fontSize(9.5).font("Helvetica-Bold").fillColor(DARK)
+     .text("▸  " + name, MX, my, { width: MW, continued: true });
+  doc.fontSize(8.5).font("Helvetica").fillColor(BLUE).text(`  [${stack}]`);
+  my = doc.y;
+  doc.fontSize(9).font("Helvetica").fillColor(GRAY).text(desc, MX, my, { width: MW });
+  my = doc.y;
+  if (url) {
+    doc.fontSize(8).fillColor(BLUE).text(url, MX, my, { width: MW });
+    my = doc.y;
+  }
+  my += 4;
+});
+
+// ─── Footer ─────────────────────────────────────────────────────────
+const FOOTER_Y = PH - 28;
+doc.rect(SIDEBAR_W, FOOTER_Y - 2, MAIN_W, 30).fill(BGRIGHT);
+doc.fontSize(7.5).font("Helvetica").fillColor(LGRAY)
+   .text(
+     "thanseyha2002@gmail.com  ·  +855 186 323 203  ·  github.com/seyha29  ·  linkedin.com/in/thanseyha",
+     MAIN_X + PAD, FOOTER_Y + 4,
+     { width: MAIN_W - PAD * 2, align: "center" }
+   );
 
 doc.end();
 console.log("PDF generated at:", outPath);
