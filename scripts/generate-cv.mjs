@@ -61,16 +61,12 @@ doc.fontSize(8).font("Helvetica").fillColor(LGRAY)
 
 let curY = headerBottom + 18;
 
-// ── Helper: horizontal divider ────────────────────────────────────────
-function divider(y) {
-  doc.moveTo(M, y).lineTo(PW - M, y).strokeColor(BLUE).lineWidth(0.6).stroke();
-}
+// ── Helper: horizontal divider (no-op — lines removed) ───────────────
+function divider(_y) {}
 
-// ── Helper: section heading (blue text + underline) ───────────────────
+// ── Helper: section heading (blue text, no underline) ─────────────────
 function sectionHeading(label, x, y, w) {
   doc.fontSize(14).font("Helvetica-Bold").fillColor(BLUE).text(label, x, y, { width: w });
-  const lineY = doc.y + 1;
-  doc.moveTo(x, lineY).lineTo(x + w, lineY).strokeColor(BLUE).lineWidth(0.7).stroke();
   return doc.y + 5;
 }
 
@@ -134,7 +130,6 @@ const eduItems = [
 eduItems.forEach(([title, sub]) => {
   ly = entryTitle(title, LX, ly, CW);
   ly = entrySub(sub, LX, ly, CW);
-  doc.moveTo(LX, ly + 3).lineTo(LX + CW, ly + 3).strokeColor("#334155").lineWidth(0.4).stroke();
   ly += 10;
 });
 const leftEndY1 = ly;
@@ -168,7 +163,6 @@ const skillItems = [
 ];
 skillItems.forEach(([bold, normal]) => {
   ly = boldLine(bold, normal, LX, ly, CW);
-  doc.moveTo(LX, ly).lineTo(LX + CW, ly).strokeColor("#334155").lineWidth(0.4).stroke();
   ly += 5;
 });
 const leftEndY2 = ly;
@@ -178,7 +172,6 @@ ry = sectionHeading("Languages", RX, curY, CW);
 
 ["Khmer (Native)", "English (Medium)"].forEach((lang) => {
   ry = bodyText(lang, RX, ry, CW);
-  doc.moveTo(RX, ry).lineTo(RX + CW, ry).strokeColor("#334155").lineWidth(0.4).stroke();
   ry += 5;
 });
 const rightEndY2 = ry;
@@ -205,7 +198,6 @@ contactItems.forEach(([bold, val]) => {
   const lineY2 = ly;
   doc.fontSize(9.5).font("Helvetica").fillColor(LBLUE).text(val, LX + bw, lineY2, { width: CW - bw });
   ly = doc.y;
-  doc.moveTo(LX, ly + 2).lineTo(LX + CW, ly + 2).strokeColor("#334155").lineWidth(0.4).stroke();
   ly += 8;
 });
 const leftEndY3 = ly;
@@ -225,7 +217,6 @@ personalItems.forEach(([bold, val]) => {
   const lineY3 = ry;
   doc.fontSize(9.5).font("Helvetica").fillColor(WHITE).text(val, RX + bw, lineY3, { width: CW - bw });
   ry = doc.y;
-  doc.moveTo(RX, ry + 2).lineTo(RX + CW, ry + 2).strokeColor("#334155").lineWidth(0.4).stroke();
   ry += 8;
 });
 const rightEndY3 = ry;
