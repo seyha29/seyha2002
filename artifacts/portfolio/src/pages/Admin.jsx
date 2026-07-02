@@ -27,7 +27,8 @@ function Admin() {
 
   const loadData = async () => {
     const d = await fetchPortfolio();
-    setData(d);
+    const cv = await fetch(`${BASE}/portfolio/cv`).then(r => r.json());
+    setData({ ...d, cv });
   };
 
   useEffect(() => {
@@ -85,9 +86,9 @@ function Admin() {
       </div>
 
       <div className="admin-tabs">
-        {["projects", "certificates", "skills", "about", "contact"].map((tab) => (
+        {["projects", "certificates", "skills", "about", "contact", "cv"].map((tab) => (
           <button key={tab} className={`admin-tab ${activeTab === tab ? "active" : ""}`} onClick={() => setActiveTab(tab)}>
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "cv" ? "CV" : tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -98,6 +99,7 @@ function Admin() {
         {activeTab === "skills" && <SkillsEditor skills={data.skills} onSave={(v) => save("skills", v)} saving={saving} />}
         {activeTab === "about" && <AboutEditor about={data.about} onSave={(v) => save("about", v)} saving={saving} />}
         {activeTab === "contact" && <ContactEditor contact={data.contact} onSave={(v) => save("contact", v)} saving={saving} />}
+        {activeTab === "cv" && <CVEditor cv={data.cv} onSave={(v) => save("cv", v)} saving={saving} />}
       </div>
     </div>
   );
@@ -262,6 +264,152 @@ function ContactEditor({ contact, onSave, saving }) {
         </div>
       </div>
       <button className="save-btn" onClick={() => onSave(form)} disabled={saving}>{saving ? "Saving..." : "Save Contact"}</button>
+    </div>
+  );
+}
+
+function CVEditor({ cv, onSave, saving }) {
+  const [form, setForm] = useState(cv);
+  const [previewImage, setPreviewImage] = useState(cv.profileImage);
+  useEffect(() => { setForm(cv); setPreviewImage(cv.profileImage); }, [cv]);
+
+  const update = (field, val) => setForm(f => ({ ...f, [field]: val }));
+  const updateNested = (field, subfield, val) => setForm(f => ({ ...f, [field]: { ...f[field], [subfield]: val } }));
+
+  const updateEdu = (i, field, val) => {
+    const edu = form.education.map((e, idx) => idx === i ? { ...e, [field]: val } : e);
+    setForm(f => ({ ...f, education: edu }));
+  };
+  const addEdu = () => setForm(f => ({ ...f, education: [...f.education, { degree: "", school: "", year: "" }] }));
+  const removeEdu = (i) => setForm(f => ({ ...f, education: f.education.filter((_, idx) => idx !== i) }));
+
+  const updateSkill = (i, field, val) => {
+    const skills = form.cvSkills.map((s, idx) => idx === i ? { ...s, [field]: val } : s);
+    setForm(f => ({ ...f, cvSkills: skills }));
+  };
+  const addSkill = () => setForm(f => ({ ...f, cvSkills: [...f.cvSkills, { category: "", items: "" }] }));
+  const removeSkill = (i) => setForm(f => ({ ...f, cvSkills: f.cvSkills.filter((_, idx) => idx !== i) }));
+
+  const updateLang = (i, val) => {
+    const langs = form.languages.map((l, idx) => idx === i ? val : l);
+    setForm(f => ({ ...f, languages: langs }));
+  };
+  const addLang = () => setForm(f => ({ ...f, languages: [...f.languages, ""] }));
+  const removeLang = (i) => setForm(f => ({ ...f, languages: f.languages.filter((_, idx) => idx !== i) }));
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target.result;
+      setPreviewImage(base64);
+      setForm(f => ({ ...f, profileImage: base64 }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="admin-section">
+      <h2>CV / Resume</h2>
+
+      <div className="admin-card">
+        <h3 style={{ marginBottom: 16, color: "#60a5fa" }}>Profile Photo</h3>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <img
+            src={previewImage}
+            alt="Profile"
+            style={{ width: 100, height: 100, borderRadius: "50%", objectFit: "cover", border: "3px solid #3b82f6" }}
+          />
+          <div>
+            <label className="cv-upload-label">
+              📷 Upload New Photo
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
+            </label>
+            <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 6 }}>JPG, PNG supported. Will save to API.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3 style={{ marginBottom: 16, color: "#60a5fa" }}>Basic Info</h3>
+        <div className="form-grid">
+          <label>Full Name<input value={form.name} onChange={e => update("name", e.target.value)} /></label>
+          <label>Title / Role<input value={form.title} onChange={e => update("title", e.target.value)} placeholder="Software Developer" /></label>
+          <label className="full">Summary<textarea value={form.summary} onChange={e => update("summary", e.target.value)} rows={4} /></label>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 style={{ color: "#60a5fa" }}>Education</h3>
+          <button className="add-btn" onClick={addEdu}>+ Add</button>
+        </div>
+        {form.education.map((e, i) => (
+          <div key={i} className="cv-sub-card">
+            <div className="form-grid">
+              <label className="full">Degree / Certificate<input value={e.degree} onChange={ev => updateEdu(i, "degree", ev.target.value)} /></label>
+              <label>School / Institution<input value={e.school} onChange={ev => updateEdu(i, "school", ev.target.value)} /></label>
+              <label>Year<input value={e.year} onChange={ev => updateEdu(i, "year", ev.target.value)} placeholder="Graduated 2025" /></label>
+            </div>
+            <button className="remove-btn sm" onClick={() => removeEdu(i)} style={{ marginTop: 8 }}>✕ Remove</button>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 style={{ color: "#60a5fa" }}>Skills (CV)</h3>
+          <button className="add-btn" onClick={addSkill}>+ Add Row</button>
+        </div>
+        {form.cvSkills.map((s, i) => (
+          <div key={i} className="cv-sub-card">
+            <div className="form-grid">
+              <label>Category<input value={s.category} onChange={e => updateSkill(i, "category", e.target.value)} placeholder="Frontend" /></label>
+              <label>Items<input value={s.items} onChange={e => updateSkill(i, "items", e.target.value)} placeholder="HTML, CSS, JavaScript" /></label>
+            </div>
+            <button className="remove-btn sm" onClick={() => removeSkill(i)} style={{ marginTop: 8 }}>✕ Remove</button>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 style={{ color: "#60a5fa" }}>Languages</h3>
+          <button className="add-btn" onClick={addLang}>+ Add</button>
+        </div>
+        {form.languages.map((l, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input value={l} onChange={e => updateLang(i, e.target.value)} placeholder="Khmer (Native)" style={{ flex: 1 }} />
+            <button className="remove-btn sm" onClick={() => removeLang(i)}>✕</button>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-card">
+        <h3 style={{ marginBottom: 16, color: "#60a5fa" }}>Personal Info</h3>
+        <div className="form-grid">
+          <label>Gender<input value={form.personalInfo.gender} onChange={e => updateNested("personalInfo", "gender", e.target.value)} /></label>
+          <label>Date of Birth<input value={form.personalInfo.dob} onChange={e => updateNested("personalInfo", "dob", e.target.value)} placeholder="03 August 2002" /></label>
+          <label>Age<input value={form.personalInfo.age} onChange={e => updateNested("personalInfo", "age", e.target.value)} placeholder="23 years old" /></label>
+          <label>Address<input value={form.personalInfo.address} onChange={e => updateNested("personalInfo", "address", e.target.value)} /></label>
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3 style={{ marginBottom: 16, color: "#60a5fa" }}>Contact Links</h3>
+        <div className="form-grid">
+          <label>Email<input value={form.contactLinks.email} onChange={e => updateNested("contactLinks", "email", e.target.value)} /></label>
+          <label>Phone<input value={form.contactLinks.phone} onChange={e => updateNested("contactLinks", "phone", e.target.value)} /></label>
+          <label>GitHub URL<input value={form.contactLinks.github} onChange={e => updateNested("contactLinks", "github", e.target.value)} /></label>
+          <label>GitHub Label<input value={form.contactLinks.githubLabel} onChange={e => updateNested("contactLinks", "githubLabel", e.target.value)} /></label>
+          <label>LinkedIn URL<input value={form.contactLinks.linkedin} onChange={e => updateNested("contactLinks", "linkedin", e.target.value)} /></label>
+          <label>LinkedIn Label<input value={form.contactLinks.linkedinLabel} onChange={e => updateNested("contactLinks", "linkedinLabel", e.target.value)} /></label>
+          <label>Telegram<input value={form.contactLinks.telegram} onChange={e => updateNested("contactLinks", "telegram", e.target.value)} /></label>
+        </div>
+      </div>
+
+      <button className="save-btn" onClick={() => onSave(form)} disabled={saving}>{saving ? "Saving..." : "Save CV"}</button>
     </div>
   );
 }

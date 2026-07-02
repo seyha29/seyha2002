@@ -87,4 +87,15 @@ router.put("/portfolio/contact", authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
+router.get("/portfolio/cv", (_req, res) => {
+  res.json(readData().cv);
+});
+
+router.put("/portfolio/cv", authMiddleware, (req, res) => {
+  const data = readData();
+  data.cv = req.body;
+  writeData(data);
+  res.json({ success: true });
+});
+
 export default router;

@@ -154,5 +154,60 @@
     "email": "thanseyha2002@gmail.com",
     "phone": "+855 186-323-203",
     "location": "Phnom Penh, Cambodia"
+  },
+  "cv": {
+    "name": "Than Seyha",
+    "title": "Software Developer",
+    "summary": "I am a recent Computer Science graduate passionate about technology and software development. Skilled in programming, problem-solving, and eager to contribute through internships and projects. Motivated and ready to grow in a dynamic tech environment.",
+    "profileImage": "/assets/profile1.jpg",
+    "education": [
+      {
+        "degree": "Bachelor's Degree in Computer Science",
+        "school": "Royal University Of Phnom Penh",
+        "year": "Graduated 2025"
+      },
+      {
+        "degree": "Diploma General Education",
+        "school": "Hun Sen Sandek High School",
+        "year": "Graduated 2021"
+      }
+    ],
+    "cvSkills": [
+      {
+        "category": "Frontend",
+        "items": "HTML, CSS, JavaScript, React.js, Bootstrap, Tailwind"
+      },
+      {
+        "category": "Backend",
+        "items": "PHP, Laravel"
+      },
+      {
+        "category": "Tools & Technologies",
+        "items": "Git, GitHub, REST APIs, MySQL, Responsive Web Design"
+      },
+      {
+        "category": "Research",
+        "items": "Google, AI"
+      }
+    ],
+    "languages": [
+      "Khmer (Native)",
+      "English (Medium)"
+    ],
+    "personalInfo": {
+      "gender": "Male",
+      "dob": "03 August 2002",
+      "age": "23 years old",
+      "address": "Phnom Penh, Cambodia"
+    },
+    "contactLinks": {
+      "email": "thanseyha2002@gmail.com",
+      "phone": "+855 186323203",
+      "github": "https://github.com/seyha29",
+      "githubLabel": "seyha29",
+      "linkedin": "https://linkedin.com/in/thanseyha",
+      "linkedinLabel": "thanseyha",
+      "telegram": "@thanseyha11"
+    }
   }
 }
