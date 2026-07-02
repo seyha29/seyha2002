@@ -10,11 +10,11 @@ const PW  = doc.page.width;   // 595.28
 const PH  = doc.page.height;  // 841.89
 
 // ── Colours matching the portfolio website ────────────────────────────
-const BG     = "#0f172a";   // dark navy page background
-const CARD   = "#1e293b";   // slightly lighter card/section bg
+const BG     = "#ffffff";   // dark navy page background
+const CARD   = "#f1f5f9";   // slightly lighter card/section bg
 const BLUE   = "#3b82f6";   // blue headings
-const WHITE  = "#f1f5f9";   // body text
-const LGRAY  = "#94a3b8";   // sub-text gray
+const WHITE  = "#1e293b";   // body text
+const LGRAY  = "#475569";   // sub-text gray
 const LBLUE  = "#60a5fa";   // link blue
 
 // ── Margins / layout ─────────────────────────────────────────────────
